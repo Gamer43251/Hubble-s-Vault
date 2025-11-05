@@ -25,7 +25,7 @@ public class HubblesVault {
         System.out.println("[3] Exit");
         System.out.println("How Would You Like To Proceed (1/2/3):");
         
-        while(!valid){
+        while(valid == false){
            try{
                int choice = sc.nextInt();
         
@@ -44,6 +44,7 @@ public class HubblesVault {
            }catch(InputMismatchException e){
                System.out.println("Please Enter A Valid Integer");
                valid = false;
+               
            }
         }
         
