@@ -17,6 +17,15 @@ public class HubblesVault {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        try{
+            AccountFileManager fileManager = new AccountFileManager();
+            fileManager.init();
+            System.out.println("Hubbles Vault is Ready To Store Account Details");
+        }catch(Exception e){
+            System.err.println("Initialization Failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
         boolean valid = false;
         System.out.println("===============================");
         System.out.println("Welcome To Hubble's Vault");
