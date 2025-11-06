@@ -16,24 +16,31 @@ public class HubblesVault {
     /**
      * @param args the command line arguments
      */
+    
+    static AccountFileManager fileManager = null;
+    
     public static void main(String[] args) {
+        
         try{
-            AccountFileManager fileManager = new AccountFileManager();
+            fileManager = new AccountFileManager();
             fileManager.init();
-            System.out.println("Hubbles Vault is Ready To Store Account Details");
+            //System.out.println("Hubbles Vault is Ready To Store Account Details"); Utilised for Testing
         }catch(Exception e){
             System.err.println("Initialization Failed: " + e.getMessage());
             e.printStackTrace();
         }
         
+        startupMenu();
         
+    }
+    
+    public static void startupMenu(){
         boolean valid = false;
         System.out.println("===============================");
         System.out.println("Welcome To Hubble's Vault");
         System.out.println("[1] Login");
-        System.out.println("[2] Create Account");
-        System.out.println("[3] Exit");
-        System.out.println("How Would You Like To Proceed (1/2/3):");
+        System.out.println("[2] Exit");
+        System.out.println("How Would You Like To Proceed (1|2):");
         
         while(valid == false){
            try{
@@ -44,9 +51,6 @@ public class HubblesVault {
                         login();
                         valid = true;
                     case 2:
-                        createAccount();
-                        valid = true;
-                    case 3:
                         System.exit(0);
                         valid = true;
                 }
@@ -57,16 +61,20 @@ public class HubblesVault {
                
            }
         }
-        
     }
     
     public static void login(){
-        System.out.println("Enter Your Username: ");
-        String username = sc.next();
+        System.out.println("Enter Your Email: ");
+        String email = sc.next();
+        System.out.println("Enter Your Password");
+        String password = sc.next();
+        
+        if(fileManager.login(email, password)){
+            System.out.println("Access Granted");
+        }else{
+            System.out.println("Invalid Credentials Please Try Again");
+        }
     }
     
-    public static void createAccount(){
-        
-    }
     
 }

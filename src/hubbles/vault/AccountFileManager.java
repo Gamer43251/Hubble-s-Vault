@@ -98,4 +98,69 @@ public class AccountFileManager {
         
         System.out.println("Seeded demo accounts (" + lines.size() + ") into credentials.txt");
     }
+    
+    private static class ParsedRecord{
+        String username;
+        int iterations;
+        byte[] salt;
+        byte[] dk;
+    }
+    
+    private static ParsedRecord parseRecordLine(String line){
+        if(line == null || line.isBlank()) throw new IllegalArgumentException("Empty Record Line");
+        String[] parts = line.split("\\|");
+        if(parts.length < 2) throw new IllegalArgumentException("Bad record line: " + line);
+        
+        String[] kdf = parts[1].split(":");
+        if (kdf.length != 3) throw new IllegalArgumentException("Bad kdf spec: " + parts[1]);
+
+        ParsedRecord r = new ParsedRecord();
+        r.username = parts[0];
+        r.iterations = Integer.parseInt(kdf[0]);
+        r.salt = SecurityUtils.deb64(kdf[1]);
+        r.dk = SecurityUtils.deb64(kdf[2]);
+        return r;
+    }
+    
+    public static String formatRecord(ParsedRecord r){
+        String uname = r.username.toLowerCase();
+        String kdfSpec = r.iterations + ":" + SecurityUtils.b64(r.salt) + ":" + SecurityUtils.b64(r.dk);
+        return uname + "|" + kdfSpec;
+    }
+    
+    private Map<String, String> loadRawLinesMap() throws IOException {
+        if (!java.nio.file.Files.exists(credentialsFile)) return new java.util.LinkedHashMap<>();
+        var lines = java.nio.file.Files.readAllLines(credentialsFile, java.nio.charset.StandardCharsets.UTF_8);
+        var map = new java.util.LinkedHashMap<String,String>();
+        for (String L : lines) {
+            if (L == null || L.isBlank()) continue;
+            int sep = L.indexOf('|');
+            if (sep <= 0) continue;
+            map.put(L.substring(0, sep).toLowerCase(), L);
+        }
+        return map;
+    }
+    
+    private ParsedRecord findUser(String username) throws java.io.IOException {
+        var map = loadRawLinesMap();
+        String line = map.get(username.toLowerCase());
+        return (line == null) ? null : parseRecordLine(line);
+    }
+    
+    public boolean login(String username, String password) {
+    try {
+        ParsedRecord rec = findUser(username);
+        if (rec == null) return false;
+
+        // IMPORTANT: if you later add a PEPPER, you must also seed with it.
+        byte[] computed = SecurityUtils.pbkdf(password.toCharArray(), rec.salt, rec.iterations, rec.dk.length * 8);
+        return SecurityUtils.constantTimeEquals(computed, rec.dk);
+    } catch (Exception e) {
+        // For debugging; in production you might log and return false
+        e.printStackTrace();
+        return false;
+    }
+}
+
+
 }
