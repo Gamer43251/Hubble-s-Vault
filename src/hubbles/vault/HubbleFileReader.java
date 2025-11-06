@@ -22,25 +22,25 @@ public class HubbleFileReader {
         return content.toString();
     }
 
-    // 👇 NEW method: decrypts the correct file based on the logged-in user
+   
     public void decryptForLoggedInUser(String loggedInUser) {
         HubbleFileReader reader = new HubbleFileReader();
         HubbleDecryptor decryptor = new HubbleDecryptor();
 
         String filePath = "";
 
-        if (loggedInUser.equalsIgnoreCase("sarah")) {
-            filePath = "users/sarah.txt";
-        } else if (loggedInUser.equalsIgnoreCase("james")) {
-            filePath = "users/james.txt";
-        } else if (loggedInUser.equalsIgnoreCase("emma")) {
-            filePath = "users/emma.txt";
-        } else if (loggedInUser.equalsIgnoreCase("liam")) {
-            filePath = "users/liam.txt";
-        } else if (loggedInUser.equalsIgnoreCase("lucy")) {
-            filePath = "users/lucy.txt";
+        if (loggedInUser.equalsIgnoreCase("TheCrimsonShadow")) {
+            filePath = "users/TheCrimsonShadow.txt";
+        } else if (loggedInUser.equalsIgnoreCase("CosmicStorm89")) {
+            filePath = "users/CosmicStorm89.txt";
+        } else if (loggedInUser.equalsIgnoreCase("ViridianHelmet64")) {
+            filePath = "users/ViridianHelmet64.txt";
+        } else if (loggedInUser.equalsIgnoreCase("JuniperLanding34")) {
+            filePath = "users/JuniperLanding34.txt";
+        } else if (loggedInUser.equalsIgnoreCase("PrettyLittleDevil12")) {
+            filePath = "users/PrettyLittleDevil12.txt";
         } else {
-            System.out.println("Error: Unknown user logged in!");
+            System.out.println("Error: There is no user in the system with that username!");
             return;
         }
 
