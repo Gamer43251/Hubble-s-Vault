@@ -75,6 +75,9 @@ public class HubblesVault {
         
         if(fileManager.login(email, password)){
             System.out.println("Access Granted");
+            PasswordStorage.setVaultFileName(email + "_vault.txt");
+            PasswordStorage ps = new PasswordStorage();
+            ps.vaultMenu();
         }else{
             System.out.println("Invalid Credentials Please Try Again");
         }
