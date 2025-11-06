@@ -5,7 +5,12 @@
 package hubbles.vault;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 /**
  *
  * @author dreel
@@ -14,6 +19,10 @@ public class AccountFileManager {
     private final Path baseDir;
     private final Path credentialsFile;
     private final Path vaultsDir;
+    
+    private static final int PBKDF_ITER = 520_000;  
+    private static final int SALT_LEN = 16;           
+    private static final int DK_BITS  = 256;          
     
     public AccountFileManager(){
         this(Paths.get(System.getProperty("user.home"), "HubblesVaultData"));
@@ -26,21 +35,67 @@ public class AccountFileManager {
     }
     
     public void init() throws IOException{
-        Files.createDirectories(vaultsDir);
-        
-        if(!Files.exists(credentialsFile)){
-            Files.createFile(credentialsFile);
+        if(!Files.exists(baseDir)){
+            Files.createDirectories(vaultsDir);
+
+            boolean created = false;
+            if(!Files.exists(credentialsFile)){
+                Files.createFile(credentialsFile);
+                created = true;
+            }
+
+            if (created || isFileEmpty(credentialsFile)) {
+                try {
+                    seedInitialAccounts();
+                } catch (Exception e) {
+                    throw new IOException("Failed to seed demo accounts", e);
+                }
+            }
+
+            System.out.println("== Hubbles Vault Initialized ==");
+            System.out.println("Base Directory : " + baseDir.toAbsolutePath());
+            System.out.println("Credentials File : " + credentialsFile.toAbsolutePath());
+            System.out.println("Vaults Directory : " + vaultsDir.toAbsolutePath());
+            System.out.println("===========================");
+        }else{
+            System.out.println("Files Already Exist");
         }
-        
-        System.out.println("== Hubbles Vault Initialized ==");
-        System.out.println("Base Directory : " + baseDir.toAbsolutePath());
-        System.out.println("Credentials File : " + credentialsFile.toAbsolutePath());
-        System.out.println("Vaults Directory : " + vaultsDir.toAbsolutePath());
-        System.out.println("===========================");
+    }
+    
+    private boolean isFileEmpty(Path p) throws IOException {
+        return Files.size(p) == 0;
     }
     
     public Path getBaseDir() {return baseDir;}
     public Path getCredentialsFile() {return credentialsFile;}
     public Path getVaultDir() {return vaultsDir;}
     
+    private void seedInitialAccounts() throws Exception{
+        Map<String,String> demo = new LinkedHashMap<>();
+        demo.put("TheCrimsonShadow@gmail.com", "Password1");
+        demo.put("CosmicStorm89@gmail.com", "SuperNova98");
+        demo.put("ViridianHelmet64@gmail.com", "GreenGardens22");
+        demo.put("JuniperLanding34@gmail.com", "Planetfall");
+        demo.put("PrettyLittleDevil12@gmail.com", "TwoCanKeepASecret!");
+        
+        List<String> lines = new ArrayList<>();
+        for(Map.Entry<String,String> e : demo.entrySet()){
+            String username = e.getKey().toLowerCase();
+            String password = e.getValue();
+            
+            byte[] salt = SecurityUtils.randomBytes(SALT_LEN);
+            byte[] dk = SecurityUtils.pbkdf(password.toCharArray(), salt, PBKDF_ITER, DK_BITS);
+            
+            String kdfSpec = PBKDF_ITER + ":" + SecurityUtils.b64(salt) + ":" + SecurityUtils.b64(dk);
+            String record  = username + "|" + kdfSpec + "|0|null";
+            lines.add(record);           
+        }
+        
+        Path tmp = credentialsFile.resolveSibling("credentials.txt.tmp");
+        String content = String.join("\n", lines) + "\n";
+        Files.writeString(tmp, content, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.move(tmp, credentialsFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        
+        System.out.println("Seeded demo accounts (" + lines.size() + ") into credentials.txt");
+    }
 }

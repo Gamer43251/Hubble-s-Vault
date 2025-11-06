@@ -26,6 +26,7 @@ public class HubblesVault {
             e.printStackTrace();
         }
         
+        
         boolean valid = false;
         System.out.println("===============================");
         System.out.println("Welcome To Hubble's Vault");
