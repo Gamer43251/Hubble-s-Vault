@@ -1,32 +1,54 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package hubbles.vault;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-/**
- *
- * @author sarah
- */
+
 public class HubbleFileReader {
-    // This reads a file and returns ALL the text inside it as one big String
-    public String readEncryptedFile(String PasswordDatabse.txt) {
+
+    // Reads the encrypted file and returns its contents
+    public String readEncryptedFile(String filePath) {
         StringBuilder content = new StringBuilder();
 
-        // BufferedReader lets us read the file line by line
-        try (BufferedReader br = new BufferedReader(new FileReader(PasswordDatabse.txt))) {
-
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while((line = br.readLine()) != null){
-                content.append(line).append("\n"); // add each line to the string
+            while ((line = br.readLine()) != null) {
+                content.append(line).append("\n");
             }
-
         } catch (IOException e) {
-            e.printStackTrace(); // prints error if file can't be read
+            e.printStackTrace();
         }
 
-        return content.toString(); // return the full file data as a big string
+        return content.toString();
+    }
+
+    // 👇 NEW method: decrypts the correct file based on the logged-in user
+    public void decryptForLoggedInUser(String loggedInUser) {
+        HubbleFileReader reader = new HubbleFileReader();
+        HubbleDecryptor decryptor = new HubbleDecryptor();
+
+        String filePath = "";
+
+        if (loggedInUser.equalsIgnoreCase("sarah")) {
+            filePath = "users/sarah.txt";
+        } else if (loggedInUser.equalsIgnoreCase("james")) {
+            filePath = "users/james.txt";
+        } else if (loggedInUser.equalsIgnoreCase("emma")) {
+            filePath = "users/emma.txt";
+        } else if (loggedInUser.equalsIgnoreCase("liam")) {
+            filePath = "users/liam.txt";
+        } else if (loggedInUser.equalsIgnoreCase("lucy")) {
+            filePath = "users/lucy.txt";
+        } else {
+            System.out.println("Error: Unknown user logged in!");
+            return;
+        }
+
+        // Now read and decrypt
+        String encryptedData = reader.readEncryptedFile(filePath);
+        String decryptedData = decryptor.decrypt(encryptedData, 3); // example shift
+
+        System.out.println("\n--- Decrypted data for " + loggedInUser + " ---");
+        System.out.println(decryptedData);
     }
 }
