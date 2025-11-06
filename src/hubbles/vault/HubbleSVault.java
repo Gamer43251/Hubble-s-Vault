@@ -30,36 +30,40 @@ public class HubblesVault {
             e.printStackTrace();
         }
         
-        startupMenu();
-        
+        while (true) {
+            int choice = startupMenu();
+            switch (choice) {
+                case 1:
+                    login();
+                    break; // return to menu after login attempt
+                case 2:
+                    System.out.println("Goodbye!");
+                    return;
+                default:
+                    // shouldn’t happen because we validate input
+                    break;
+            }
+        }
     }
     
-    public static void startupMenu(){
-        boolean valid = false;
+    private static int startupMenu() {
         System.out.println("===============================");
         System.out.println("Welcome To Hubble's Vault");
         System.out.println("[1] Login");
         System.out.println("[2] Exit");
-        System.out.println("How Would You Like To Proceed (1|2):");
-        
-        while(valid == false){
-           try{
-               int choice = sc.nextInt();
-        
-                switch(choice){
-                    case 1:
-                        login();
-                        valid = true;
-                    case 2:
-                        System.exit(0);
-                        valid = true;
+        System.out.print("How would you like to proceed (1|2): ");
+
+        while (true) {
+            String line = sc.nextLine().trim();
+            try {
+                int choice = Integer.parseInt(line);
+                if (choice == 1 || choice == 2) {
+                    return choice;
                 }
-                
-           }catch(InputMismatchException e){
-               System.out.println("Please Enter A Valid Integer");
-               valid = false;
-               
-           }
+                System.out.print("Please enter 1 or 2: ");
+            } catch (NumberFormatException e) {
+                System.out.print("Please enter a valid integer (1 or 2): ");
+            }
         }
     }
     
