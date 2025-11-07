@@ -4,17 +4,86 @@
  */
 package hubbles.vault;
 
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
 /**
  *
  * @author dreel
  */
 public class HubblesVault {
-
+    static Scanner sc = new Scanner(System.in);
     /**
      * @param args the command line arguments
      */
+    
+    static AccountFileManager fileManager = null;
+    
     public static void main(String[] args) {
-        // TODO code application logic here
+        
+        try{
+            fileManager = new AccountFileManager();
+            fileManager.init();
+            //System.out.println("Hubbles Vault is Ready To Store Account Details"); Utilised for Testing
+        }catch(Exception e){
+            System.err.println("Initialization Failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        while (true) {
+            int choice = startupMenu();
+            switch (choice) {
+                case 1:
+                    login();
+                    break; // return to menu after login attempt
+                case 2:
+                    System.out.println("Goodbye!");
+                    return;
+                default:
+                    // shouldn’t happen because we validate input
+                    break;
+            }
+        }
     }
+    
+    private static int startupMenu() {
+        System.out.println("===============================");
+        System.out.println("Welcome To Hubble's Vault");
+        System.out.println("[1] Login");
+        System.out.println("[2] Exit");
+        System.out.print("How would you like to proceed (1|2): ");
+
+        while (true) {
+            String line = sc.nextLine().trim();
+            try {
+                int choice = Integer.parseInt(line);
+                if (choice == 1 || choice == 2) {
+                    return choice;
+                }
+                System.out.print("Please enter 1 or 2: ");
+            } catch (NumberFormatException e) {
+                System.out.print("Please enter a valid integer (1 or 2): ");
+            }
+        }
+    }
+    
+    public static void login(){
+        System.out.println("Enter Your Email: ");
+        String email = sc.next();
+        System.out.println("Enter Your Password");
+        String password = sc.next();
+        
+         if(fileManager.login(email, password)){ 
+            System.out.println("Access Granted"); 
+            email = email.split("@")[0];
+            String vaultPath = fileManager.getVaultDir().resolve(email + "_vault.txt").toString(); 
+            PasswordStorage.setVaultFileName(vaultPath);         
+            PasswordStorage ps = new PasswordStorage();
+            ps.vaultMenu();
+        }else{
+            System.out.println("Invalid Credentials Please Try Again");
+        }
+    }
+    
     
 }
