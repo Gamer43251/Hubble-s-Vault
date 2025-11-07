@@ -6,6 +6,7 @@ package hubbles.vault;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -41,6 +42,7 @@ public class PasswordStorage{
     
     public static void addPassword(String appName, String username, String passwords){
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(vaultFileName, true))){
+            System.out.println("Vault file path: " + new File(vaultFileName).getAbsolutePath());
             String encryptedPassword = encryptPassword(passwords);
             String account = appName + "," + username + "," + encryptedPassword;
             writer.write(account);
@@ -101,7 +103,7 @@ public class PasswordStorage{
                     break;
 
                 default:
-                    System.out.println("Invalid choice!");
+                    System.out.println("Invalid choice");
             }
         } while (choice != 5);
 

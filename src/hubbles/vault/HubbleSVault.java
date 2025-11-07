@@ -73,9 +73,11 @@ public class HubblesVault {
         System.out.println("Enter Your Password");
         String password = sc.next();
         
-        if(fileManager.login(email, password)){
-            System.out.println("Access Granted");
-            PasswordStorage.setVaultFileName(email + "_vault.txt");
+         if(fileManager.login(email, password)){ 
+            System.out.println("Access Granted"); 
+            email = email.split("@")[0];
+            String vaultPath = fileManager.getVaultDir().resolve(email + "_vault.txt").toString(); 
+            PasswordStorage.setVaultFileName(vaultPath);         
             PasswordStorage ps = new PasswordStorage();
             ps.vaultMenu();
         }else{
