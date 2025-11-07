@@ -11,7 +11,7 @@ import java.util.Scanner;
  *
  * @author dreel
  */
-public class HubblesVault {
+public class HubbleSVault {
     static Scanner sc = new Scanner(System.in);
     /**
      * @param args the command line arguments

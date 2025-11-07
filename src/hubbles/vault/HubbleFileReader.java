@@ -30,15 +30,15 @@ public class HubbleFileReader {
         String filePath = "";
 
         if (loggedInUser.equalsIgnoreCase("TheCrimsonShadow")) {
-            filePath = "users/TheCrimsonShadow.txt";
+            filePath = "HubblesVaultData\\Vaults\\TheCrimsonShadow_vault.txt";
         } else if (loggedInUser.equalsIgnoreCase("CosmicStorm89")) {
-            filePath = "users/CosmicStorm89.txt";
+            filePath = "HubblesVaultData\\\\Vaults\\\\CosmicStorm89_vault.txt";
         } else if (loggedInUser.equalsIgnoreCase("ViridianHelmet64")) {
-            filePath = "users/ViridianHelmet64.txt";
+            filePath = "HubblesVaultData\\\\Vaults\\\\ViridianHelmet64_vault.txt";
         } else if (loggedInUser.equalsIgnoreCase("JuniperLanding34")) {
-            filePath = "users/JuniperLanding34.txt";
+            filePath = "HubblesVaultData\\\\Vaults\\\\JuniperLanding34_vault.txt";
         } else if (loggedInUser.equalsIgnoreCase("PrettyLittleDevil12")) {
-            filePath = "users/PrettyLittleDevil12.txt";
+            filePath = "HubblesVaultData\\\\Vaults\\\\PrettyLittleDevil12_vault.txt";
         } else {
             System.out.println("Error: There is no user in the system with that username!");
             return;
@@ -46,9 +46,9 @@ public class HubbleFileReader {
 
         // Now read and decrypt
         String encryptedData = reader.readEncryptedFile(filePath);
-        String decryptedData = decryptor.decrypt(encryptedData, 3); // example shift
+        //String decryptedData = decryptor.decrypt(encryptedData, 3); // example shift
 
         System.out.println("\n--- Decrypted data for " + loggedInUser + " ---");
-        System.out.println(decryptedData);
+        //System.out.println(decryptedData);
     }
 }

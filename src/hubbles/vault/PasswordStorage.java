@@ -17,7 +17,7 @@ import java.util.Scanner;
  *
  * @author canno
  */
-public class PasswordStorage{
+public class PasswordStorage extends HubbleDecryptor{
     private static String vaultFileName;
     private static final int shift = 3;
 
@@ -96,7 +96,7 @@ public class PasswordStorage{
                     break;
 
                 case 4:
-                    //ViewDecryptedPasswords() 
+                   HubbleDecryptor.printDecryptedFile(vaultFileName);
                     break;
                     
                  case 5:
