@@ -1,20 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package hubbles.vault;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
-/**
- *
- * @author sarah
- */
-public class HubbleDecryptor {
+public class HubbleDecryptor extends HubbleSVault {
+
+    int index, count=3;
     private static final int SHIFT = 3;
+
+    // store who is logged in WITHOUT touching AccountFileManager
+    private static String loggedInEmail;
+
+    public static void setLoggedInEmail(String email){
+        loggedInEmail = email.toLowerCase();
+    }
 
     public static String decrypt(String encrypted) {
         if (encrypted == null) return null;
@@ -35,7 +37,32 @@ public class HubbleDecryptor {
         return sb.toString();
     }
 
+    public static void EnterPassword(){
+        Scanner sc = new Scanner(System.in);
+        int attempts = 0;
+
+        while(attempts < 3) {
+            System.out.print("Re-enter your account password to continue: ");
+            String rePass = sc.nextLine();
+
+            if(HubbleSVault.fileManager.login(loggedInEmail, rePass)){
+                System.out.println("Verified.");
+                return; 
+            } else {
+                attempts++;
+                System.out.println("Incorrect Password. Attempts left: " + (3 - attempts));
+            }
+        }
+
+        System.out.println("Session Timed Out! Please Log In Again!");
+        login();
+    }
+
     public static void printDecryptedFile(String filePath) {
+
+        // require re-auth before exposing decrypted passwords
+        EnterPassword();
+
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             System.out.println("Decrypted Passwords:");
@@ -54,4 +81,7 @@ public class HubbleDecryptor {
             System.out.println("Error reading file: " + e.getMessage());
         }
     }
+
+    
 }
+

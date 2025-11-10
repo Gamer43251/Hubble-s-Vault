@@ -74,7 +74,12 @@ public class HubbleSVault {
         String password = sc.next();
         
          if(fileManager.login(email, password)){ 
+             
+            // *** THIS IS THE IMPORTANT LINE ***
+            HubbleDecryptor.setLoggedInEmail(email);
+
             System.out.println("Access Granted"); 
+            
             email = email.split("@")[0];
             String vaultPath = fileManager.getVaultDir().resolve(email + "_vault.txt").toString(); 
             PasswordStorage.setVaultFileName(vaultPath);         
@@ -83,6 +88,7 @@ public class HubbleSVault {
         }else{
             System.out.println("Invalid Credentials Please Try Again");
         }
+        
     }
     
     
