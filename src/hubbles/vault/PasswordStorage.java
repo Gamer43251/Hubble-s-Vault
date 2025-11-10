@@ -102,7 +102,7 @@ public class PasswordStorage extends HubbleDecryptor{
         int choice;
 
         do {
-            System.out.print("\nPassword Vault Menu\n1. Add Password\n2. Delete Password\n3. View Encrypted Passwords\n4. View Decrypted Passwords\n5. Logout\nEnter choice: ");
+            System.out.print("\nPassword Vault Menu\n1. Add Password\n2. Delete Password\n3. View Encrypted Passwords\n4. View Decrypted Passwords\n5. Exit\nEnter choice: ");
             choice = sc.nextInt();
             sc.nextLine(); // clear buffer
 
@@ -132,6 +132,7 @@ public class PasswordStorage extends HubbleDecryptor{
                     break;
                     
                  case 5:
+                     System.exit(0);
                     break;
 
                 default:
