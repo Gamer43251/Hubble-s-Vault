@@ -67,6 +67,36 @@ public class PasswordStorage extends HubbleDecryptor{
         }
     }
     
+    public void deletePassword(String appName){
+        File file = new File(vaultFileName);
+        File tempFile = new File(file.getParent(), "temp_vault.txt");
+        boolean deleted = false;
+        try (BufferedReader br = new BufferedReader(new FileReader(file));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))){
+            String pass;
+            while ((pass = br.readLine()) != null){
+                String[] code = pass.split(",");
+                if (code.length >= 1 && code[0].equalsIgnoreCase(appName)){
+                    deleted = true;
+                    continue;
+                }
+                bw.write(pass);
+                bw.newLine();
+            }
+        }catch(IOException e){
+            System.out.println("Error deleting password: " + e.getMessage());
+        }
+        if(file.delete() && tempFile.renameTo(file)){
+            if(deleted){
+                System.out.println("Password entry for " + appName + " deleted successfully!!!");
+            }else{
+                System.out.println("No entry found for " + appName + ".");
+            }
+        }else{
+            System.out.println("Error updating file.");
+        }
+    }
+       
     public void vaultMenu(){
         Scanner sc = new Scanner(System.in);
         int choice;
@@ -88,7 +118,9 @@ public class PasswordStorage extends HubbleDecryptor{
                     break;
 
                 case 2:                          
-                    //deletePassword();
+                    System.out.print("Enter Application Name to Delete: ");
+                    String delApp = sc.nextLine();
+                    deletePassword(delApp);
                     break;
 
                 case 3:
