@@ -80,11 +80,11 @@ public class HubbleSVault {
 
             System.out.println("Access Granted"); 
             
-            email = email.split("@")[0];
-            String vaultPath = fileManager.getVaultDir().resolve(email + "_vault.txt").toString(); 
-            PasswordStorage.setVaultFileName(vaultPath);         
-            PasswordStorage ps = new PasswordStorage();
-            ps.vaultMenu();
+            email = email.split("@")[0];//Ignore characters @ and after
+            String vaultPath = fileManager.getVaultDir().resolve(email + "_vault.txt").toString();//Make the Vault Files in the Vault Directory
+            PasswordStorage.setVaultFileName(vaultPath);//Set the Vault File Name in Password Storage Class         
+            PasswordStorage ps = new PasswordStorage();//Create an object 
+            ps.vaultMenu();//Links to the vaultMenu() in PasswordStorage Class
         }else{
             System.out.println("Invalid Credentials Please Try Again");
         }
