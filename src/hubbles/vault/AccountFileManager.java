@@ -70,7 +70,8 @@ public class AccountFileManager {
     public Path getCredentialsFile() {return credentialsFile;}
     public Path getVaultDir() {return vaultsDir;}
     
-    private void seedInitialAccounts() throws Exception{
+    private void seedInitialAccounts() throws Exception{ // method that hardcodes initial accounts
+        // Map of demo accounts: email → plain-text password
         Map<String,String> demo = new LinkedHashMap<>();
         demo.put("TheCrimsonShadow@gmail.com", "Password1");
         demo.put("CosmicStorm89@gmail.com", "SuperNova98");
@@ -78,83 +79,119 @@ public class AccountFileManager {
         demo.put("JuniperLanding34@gmail.com", "Planetfall");
         demo.put("PrettyLittleDevil12@gmail.com", "TwoCanKeepASecret!");
         
+        // List to hold formatted credential records for writing
         List<String> lines = new ArrayList<>();
+        
+        // Process each demo account
         for(Map.Entry<String,String> e : demo.entrySet()){
-            String username = e.getKey().toLowerCase();
+            
+            //Normalise the Username
+            String username = e.getKey().toLowerCase(); 
             String password = e.getValue();
             
+            //Generate a random salt for this account
             byte[] salt = SecurityUtils.randomBytes(SALT_LEN);
+            
+            //Hash the password using PBKDF2 with the random salt
             byte[] dk = SecurityUtils.pbkdf(password.toCharArray(), salt, PBKDF_ITER, DK_BITS);
             
-            String kdfSpec = PBKDF_ITER + ":" + SecurityUtils.b64(salt) + ":" + SecurityUtils.b64(dk);
+            // Format: iterations : base64(salt) : base64(hash)
+            String kdfSpec = PBKDF_ITER + ":" + SecurityUtils.b64(salt) + ":" + SecurityUtils.b64(dk); 
+            
+            // Construct the final stored record:
+            // username | kdfSpec | failedLoginCount | lastLoginTimestamp
             String record  = username + "|" + kdfSpec + "|0|null";
+            
+            //Add this record to the output list
             lines.add(record);           
         }
         
+        //Write to a temporary file to prevent partial writes
         Path tmp = credentialsFile.resolveSibling("credentials.txt.tmp");
         String content = String.join("\n", lines) + "\n";
         Files.writeString(tmp, content, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        
+        //Atomicially replace the real credentials.txt file with the new one
         Files.move(tmp, credentialsFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         
+        //print message to confuirm accounts have been seeded
         System.out.println("Seeded demo accounts (" + lines.size() + ") into credentials.txt");
     }
     
-    private static class ParsedRecord{
-        String username;
-        int iterations;
-        byte[] salt;
-        byte[] dk;
+    private static class ParsedRecord {
+        String username;   // The username/email from the record
+        int iterations;    // PBKDF2 iteration count used for hashing
+        byte[] salt;       // Salt used for hashing (decoded from Base64)
+        byte[] dk;         // The stored PBKDF2-derived key (decoded from Base64)
     }
     
-    private static ParsedRecord parseRecordLine(String line){
-        if(line == null || line.isBlank()) throw new IllegalArgumentException("Empty Record Line");
-        String[] parts = line.split("\\|");
-        if(parts.length < 2) throw new IllegalArgumentException("Bad record line: " + line);
-        
-        String[] kdf = parts[1].split(":");
-        if (kdf.length != 3) throw new IllegalArgumentException("Bad kdf spec: " + parts[1]);
+    private static ParsedRecord parseRecordLine(String line) {
 
+        // Reject empty or blank lines
+        if (line == null || line.isBlank())
+            throw new IllegalArgumentException("Empty Record Line");
+
+        // Split by '|' to extract the username and KDF spec
+        String[] parts = line.split("\\|");
+        if (parts.length < 2)
+            throw new IllegalArgumentException("Bad record line: " + line);
+
+        // Split the KDF spec into iterations, salt, and derived key
+        String[] kdf = parts[1].split(":");
+        if (kdf.length != 3)
+            throw new IllegalArgumentException("Bad kdf spec: " + parts[1]);
+
+        // Build and populate the ParsedRecord object
         ParsedRecord r = new ParsedRecord();
-        r.username = parts[0];
-        r.iterations = Integer.parseInt(kdf[0]);
-        r.salt = SecurityUtils.deb64(kdf[1]);
-        r.dk = SecurityUtils.deb64(kdf[2]);
+        r.username   = parts[0];                    // username as stored
+        r.iterations = Integer.parseInt(kdf[0]);    // PBKDF2 iterations
+        r.salt       = SecurityUtils.deb64(kdf[1]); // decode Base64 salt
+        r.dk         = SecurityUtils.deb64(kdf[2]); // decode Base64 derived key
+
         return r;
     }
     
-    public static String formatRecord(ParsedRecord r){
+    public static String formatRecord(ParsedRecord r) {
+
+        // Normalize username for storage (emails are case-insensitive)
         String uname = r.username.toLowerCase();
-        String kdfSpec = r.iterations + ":" + SecurityUtils.b64(r.salt) + ":" + SecurityUtils.b64(r.dk);
+
+        // Rebuild the PBKDF2 specification: iterations : base64(salt) : base64(hash)
+        String kdfSpec = r.iterations + ":" 
+                       + SecurityUtils.b64(r.salt) + ":" 
+                       + SecurityUtils.b64(r.dk);
+
+        // Complete record format:
+        //     username | kdfSpec
         return uname + "|" + kdfSpec;
     }
     
     private Map<String, String> loadRawLinesMap() throws IOException {
-        if (!java.nio.file.Files.exists(credentialsFile)) return new java.util.LinkedHashMap<>();
-        var lines = java.nio.file.Files.readAllLines(credentialsFile, java.nio.charset.StandardCharsets.UTF_8);
-        var map = new java.util.LinkedHashMap<String,String>();
+        if (!java.nio.file.Files.exists(credentialsFile)) return new java.util.LinkedHashMap<>(); // If credentials file doesnt exist return empty map
+        var lines = java.nio.file.Files.readAllLines(credentialsFile, java.nio.charset.StandardCharsets.UTF_8); //Read all lines from the file UTF-8
+        var map = new java.util.LinkedHashMap<String,String>(); // Map: username → raw record line (preserves insertion order)
         for (String L : lines) {
-            if (L == null || L.isBlank()) continue;
-            int sep = L.indexOf('|');
-            if (sep <= 0) continue;
-            map.put(L.substring(0, sep).toLowerCase(), L);
+            if (L == null || L.isBlank()) continue; //Skip blank or null lines
+            int sep = L.indexOf('|'); //Find the posititon of the first | seperator
+            if (sep <= 0) continue; //Skip malformed lines
+            map.put(L.substring(0, sep).toLowerCase(), L); //Store the full record line
         }
         return map;
     }
     
     private ParsedRecord findUser(String username) throws java.io.IOException {
-        var map = loadRawLinesMap();
-        String line = map.get(username.toLowerCase());
-        return (line == null) ? null : parseRecordLine(line);
+        var map = loadRawLinesMap(); //load all lines into a map for quick lookup
+        String line = map.get(username.toLowerCase()); //normalise username for lookup
+        return (line == null) ? null : parseRecordLine(line); //if user not found return null otherwise parse the line
     }
     
     public boolean login(String username, String password) {
     try {
-        ParsedRecord rec = findUser(username);
-        if (rec == null) return false;
+        ParsedRecord rec = findUser(username); //find the stored record of this user
+        if (rec == null) return false; //no user found
 
-        // IMPORTANT: if you later add a PEPPER, you must also seed with it.
-        byte[] computed = SecurityUtils.pbkdf(password.toCharArray(), rec.salt, rec.iterations, rec.dk.length * 8);
-        return SecurityUtils.constantTimeEquals(computed, rec.dk);
+        byte[] computed = SecurityUtils.pbkdf(password.toCharArray(), rec.salt, rec.iterations, rec.dk.length * 8); //hash entered password using same paramaters as originalls
+        return SecurityUtils.constantTimeEquals(computed, rec.dk); //compare computed hash with stored hash
     } catch (Exception e) {
         // For debugging; in production you might log and return false
         e.printStackTrace();

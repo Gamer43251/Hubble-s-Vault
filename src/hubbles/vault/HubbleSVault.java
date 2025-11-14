@@ -22,22 +22,21 @@ public class HubbleSVault {
     public static void main(String[] args) {
         
         try{
-            fileManager = new AccountFileManager();
-            fileManager.init();
-            //System.out.println("Hubbles Vault is Ready To Store Account Details"); Utilised for Testing
-        }catch(Exception e){
+            fileManager = new AccountFileManager(); 
+            fileManager.init(); // initialises fileManager instantiation
+        }catch(Exception e){ // if filemanager cant be initialised prints a error message
             System.err.println("Initialization Failed: " + e.getMessage());
             e.printStackTrace();
         }
         
         while (true) {
-            int choice = startupMenu();
+            int choice = startupMenu(); //handles users choice in startup menu
             switch (choice) {
                 case 1:
-                    login();
+                    login(); //calls login method if user entered 1 
                     break; // return to menu after login attempt
                 case 2:
-                    System.out.println("Goodbye!");
+                    System.out.println("Goodbye!"); // exits application if user entered 2
                     return;
                 default:
                     // shouldn’t happen because we validate input
@@ -46,14 +45,14 @@ public class HubbleSVault {
         }
     }
     
-    private static int startupMenu() {
+    private static int startupMenu() { // Prints startup menu prompting user to enter credentials
         System.out.println("===============================");
         System.out.println("Welcome To Hubble's Vault");
         System.out.println("[1] Login");
         System.out.println("[2] Exit");
         System.out.print("How would you like to proceed (1|2): ");
 
-        while (true) {
+        while (true) { // while loop to get users choice
             String line = sc.nextLine().trim();
             try {
                 int choice = Integer.parseInt(line);
@@ -67,7 +66,7 @@ public class HubbleSVault {
         }
     }
     
-    public static void login(){
+    public static void login(){ // method that handles logging in 
         System.out.println("Enter Your Email: ");
         String email = sc.next();
         System.out.println("Enter Your Password");
