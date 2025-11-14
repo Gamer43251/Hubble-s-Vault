@@ -19,26 +19,34 @@ public class SecurityUtils {
     
     private SecurityUtils(){}
     
-    public static byte[] randomBytes(int n){
+    //Generates a random byte array of length n
+    public static byte[] randomBytes(int n){ 
         byte[] b = new byte[n];
         RNG.nextBytes(b);
         return b;
     }
     
-    public static boolean constantTimeEquals(byte[] a, byte[] b){
+    //Performs a constant-time comparison between two byte arrays.
+    public static boolean constantTimeEquals(byte[] a, byte[] b){ 
         return MessageDigest.isEqual(a,b);
     }
-    // pbkdf2 = Password-Based Key Deriviation Function
+    
+    
+    // Hashes a password using PBKDF2 with HMAC-SHA256.
+    // PBKDF2 = Password-Based Key Derivation Function.
+    //It repeatedly applies HMAC hashing to slow down brute-force attacks.
     public static byte[] pbkdf(char[] password, byte[] salt, int iterations, int keyBits) throws Exception{
         PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyBits);
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         return(skf.generateSecret(spec).getEncoded());
     }
     
+    //Encodes a byte array to Base64 for safe text storage.
     public static String b64(byte[] raw){
         return Base64.getEncoder().encodeToString(raw);
     }
     
+    //Decodes a Base64 string back into its raw bytes.
     public static byte[] deb64(String s) {
         return Base64.getDecoder().decode(s);
     }
