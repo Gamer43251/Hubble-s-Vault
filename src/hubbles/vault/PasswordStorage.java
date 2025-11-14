@@ -76,7 +76,7 @@ public class PasswordStorage extends HubbleDecryptor{//PasswordStorage Class
             String pass;
             while ((pass = br.readLine()) != null){
                 String[] code = pass.split(",");
-                if (code.length >= 1 && code[0].equalsIgnoreCase(appName)){//Checks if App Name inputted matches
+                if (code.length >=                                                                      1 && code[0].equalsIgnoreCase(appName)){//Checks if App Name inputted matches
                     deleted = true;
                     continue;
                 }
